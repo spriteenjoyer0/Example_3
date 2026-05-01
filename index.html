@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Example3 </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --accent: #FF6B35; --dark: #1A1715; --cream: #FDFCFB; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--cream); color: var(--dark); overflow-x: hidden; }
+        .blob-btn { padding: 18px 36px; background: var(--accent); color: white; font-weight: 800; border-radius: 40% 60% 60% 40% / 70% 30% 70% 30%; transition: all 0.5s ease; cursor: pointer; border: none; }
+        .blob-btn:hover { border-radius: 50%; transform: scale(1.05) rotate(2deg); }
+        .tilt-card { clip-path: polygon(0% 5%, 100% 0%, 95% 100%, 5% 95%); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .tilt-card:hover { clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%); transform: scale(1.02); }
+        .input-brutalist { border: 2px solid var(--dark); padding: 15px; border-radius: 4px; width: 100%; font-weight: 600; outline: none; }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body x-data="{ 
+    tab: 'all',
+    cart: [],
+    cartOpen: false,
+    historyOpen: false,
+    authOpen: false,
+    authMode: 'login',
+    isLoggedIn: false,
+    userName: '',
+    get total() { return this.cart.reduce((sum, i) => sum + (i.price * i.count), 0) },
+    addToCart(n, p) {
+        let f = this.cart.find(x => x.name === n);
+        f ? f.count++ : this.cart.push({name: n, price: p, count: 1});
+    }
+}">
+
+    
+    <header class="p-8 flex justify-between items-center max-w-[1600px] mx-auto relative z-50">
+        <div class="text-3xl font-extrabold tracking-tighter cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">Cofee<span class="text-[#FF6B35]">_</span>Example</div>
+        <div class="flex items-center space-x-8">
+            <button @click="cartOpen = true" class="relative group">
+                <span class="absolute -top-2 -right-2 bg-[#FF6B35] text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold" x-text="cart.reduce((s, i) => s + i.count, 0)"></span>
+                <svg class="w-7 h-7 group-hover:stroke-[#FF6B35] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+            </button>
+            <div class="h-10 w-[1px] bg-gray-200"></div>
+            <button x-show="!isLoggedIn" @click="authOpen = true" class="font-bold text-sm uppercase tracking-tighter hover:text-[#FF6B35] transition-colors">Войти</button>
+            <button x-show="isLoggedIn" class="flex items-center space-x-2"><div class="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white text-[10px]" x-text="userName[0] || 'U'"></div></button>
+        </div>
+    </header>
+
+    
+    <section class="min-h-[70vh] flex items-center px-8">
+        <div class="container mx-auto grid lg:grid-cols-12 gap-12">
+            <div class="lg:col-span-7">
+                <h1 class="text-7xl md:text-9xl font-extrabold leading-none mb-8">CRAFT<br><span class="text-[#FF6B35]">Example</span><br>Coffee</h1>
+                <div class="flex items-center space-x-6">
+                    <button @click="document.getElementById('menu').scrollIntoView({behavior:'smooth'})" class="blob-btn">В каталог</button>
+                    <button @click="historyOpen = true" class="font-extrabold border-b-2 border-black pb-1 hover:text-[#FF6B35] transition-all">Наша История</button>
+                </div>
+            </div>
+            <div class="lg:col-span-5"><img src="https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&w=800" class="rounded-[60px] tilt-card shadow-2xl"></div>
+        </div>
+    </section>
+
+    
+    <section id="menu" class="py-32 px-8 bg-white/50">
+        <div class="container mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
+                <div>
+                    <h2 class="text-6xl font-black italic">Меню</h2>
+                    <p class="text-gray-400 mt-4 font-bold uppercase tracking-widest text-xs">Прямая поставка с Южной Америки</p>
+                </div>
+                <div class="flex bg-gray-100 p-2 rounded-full">
+                    <button @click="tab = 'all'" :class="tab === 'all' ? 'bg-black text-white' : 'text-gray-500 hover:text-black'" class="px-8 py-3 rounded-full font-bold transition-all text-sm">ВСЁ</button>
+                    <button @click="tab = 'grain'" :class="tab === 'grain' ? 'bg-black text-white' : 'text-gray-500 hover:text-black'" class="px-8 py-3 rounded-full font-bold transition-all text-sm">ЗЕРНО</button>
+                    <button @click="tab = 'drink'" :class="tab === 'drink' ? 'bg-black text-white' : 'text-gray-500 hover:text-black'" class="px-8 py-3 rounded-full font-bold transition-all text-sm">НАПИТКИ</button>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
+                
+                <div x-show="tab === 'all' || tab === 'grain'" class="bg-white p-8 tilt-card border border-gray-100 group">
+                    <div class="h-64 mb-8 overflow-hidden rounded-2xl bg-gray-100">
+                        <img src="https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=400" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                    </div>
+                    <span class="text-[10px] font-black uppercase text-[#FF6B35]">Ethiopia Aricha</span>
+                    <h3 class="text-2xl font-bold italic mt-2">Berry Explosion</h3>
+                    <div class="flex justify-between items-center mt-6">
+                        <span class="text-xl font-light">11 BYN</span>
+                        <button @click="addToCart('Ethiopia Aricha', 24)" class="w-12 h-12 rounded-full border-2 border-black flex items-center justify-center hover:bg-black hover:text-white transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                
+                <div x-show="tab === 'all' || tab === 'grain'" class="bg-white p-8 tilt-card border border-gray-100 group">
+                    <div class="h-64 mb-8 overflow-hidden rounded-2xl bg-gray-100">
+                        <img src="https://images.unsplash.com/photo-1580915411954-282cb1b0d780?auto=format&fit=crop&w=400" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                    </div>
+                    <span class="text-[10px] font-black uppercase text-[#FF6B35]">Brazil Mogiana</span>
+                    <h3 class="text-2xl font-bold italic mt-2">Nutty Dream</h3>
+                    <div class="flex justify-between items-center mt-6">
+                        <span class="text-xl font-light">19 BYN</span>
+                        <button @click="addToCart('Brazil Mogiana', 19)" class="w-12 h-12 rounded-full border-2 border-black flex items-center justify-center hover:bg-black hover:text-white transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                
+                <div x-show="tab === 'all' || tab === 'drink'" class="bg-white p-8 tilt-card border border-gray-100 group">
+                    <div class="h-64 mb-8 overflow-hidden rounded-2xl bg-gray-100">
+                        <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=400" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                    </div>
+                    <span class="text-[10px] font-black uppercase text-[#FF6B35]">Signature Drink</span>
+                    <h3 class="text-2xl font-bold italic mt-2">Orange Flat White</h3>
+                    <div class="flex justify-between items-center mt-6">
+                        <span class="text-xl font-light">9 BYN</span>
+                        <button @click="addToCart('Orange Flat White', 9)" class="w-12 h-12 rounded-full border-2 border-black flex items-center justify-center hover:bg-black hover:text-white transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                
+                <div x-show="tab === 'all' || tab === 'grain'" class="bg-white p-8 tilt-card border border-gray-100 group">
+                    <div class="h-64 mb-8 overflow-hidden rounded-2xl bg-gray-100">
+                        <img src="https://images.unsplash.com/photo-1611162458324-aae1eb4129a4?auto=format&fit=crop&w=400" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                    </div>
+                    <span class="text-[10px] font-black uppercase text-[#FF6B35]">Kenya</span>
+                    <h3 class="text-2xl font-bold italic mt-2">Currant Acid</h3>
+                    <div class="flex justify-between items-center mt-6">
+                        <span class="text-xl font-light">15 BYN</span>
+                        <button @click="addToCart('Kenya AA Plus', 28)" class="w-12 h-12 rounded-full border-2 border-black flex items-center justify-center hover:bg-black hover:text-white transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                
+                <div x-show="tab === 'all' || tab === 'drink'" class="bg-white p-8 tilt-card border border-gray-100 group">
+                    <div class="h-64 mb-8 overflow-hidden rounded-2xl bg-gray-100">
+                        <img src="https://images.unsplash.com/photo-1497933322675-1a02123896f2?auto=format&fit=crop&w=400" class="w-full h-full object-cover group-hover:scale-110 transition-transform">
+                    </div>
+                    <span class="text-[10px] font-black uppercase text-[#FF6B35]">Black Original</span>
+                    <h3 class="text-2xl font-bold italic mt-2">Filter Coffee</h3>
+                    <div class="flex justify-between items-center mt-6">
+                        <span class="text-xl font-light">6 BYN</span>
+                        <button @click="addToCart('Filter Coffee', 6)" class="w-12 h-12 rounded-full border-2 border-black flex items-center justify-center hover:bg-black hover:text-white transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+    <section class="py-32 px-8 bg-white border-y border-gray-50">
+        <div class="container mx-auto grid md:grid-cols-3 gap-16">
+            <div>
+                <h4 class="text-xs font-black uppercase tracking-widest text-[#FF6B35] mb-6">01. Обжарка</h4>
+                <p class="text-2xl font-bold italic mb-4 leading-tight">Контроль качества .</p>
+                <p class="text-gray-500">Никакой автоматики. Только опыт обжарщика .</p>
+            </div>
+            <div>
+                <h4 class="text-xs font-black uppercase tracking-widest text-[#FF6B35] mb-6">02. Доставка</h4>
+                <p class="text-2xl font-bold italic mb-4 leading-tight">Свежее зерно прямо к порогу.</p>
+                <p class="text-gray-500">Доставка по Добрушу в день заказа </p>
+            </div>
+            <div>
+                <h4 class="text-xs font-black uppercase tracking-widest text-[#FF6B35] mb-6">03. Прозрачность</h4>
+                <p class="text-2xl font-bold italic mb-4 leading-tight"></p>
+                <p class="text-gray-500">Мы платим фермерам больше рыночной цены за их тяжелый труд.</p>
+            </div>
+        </div>
+    </section>
+
+    
+    <footer class="pt-32 pb-12 px-8 bg-black text-white">
+        <div class="container mx-auto">
+            <div class="grid md:grid-cols-4 gap-12 mb-20">
+                <div class="col-span-2">
+                    <h2 class="text-5xl font-black italic mb-8">Информация</h2>
+                    <p class="text-gray-400 max-w-sm mb-8">Чистый вкус. Мы жарим лучший кофе в Добруше с 2077 года.</p>
+                    <div class="flex space-x-6 font-bold uppercase text-xs tracking-widest">
+                        <a href="#" class="hover:text-[#FF6B35]">Instagram</a>
+                        <a href="#" class="hover:text-[#FF6B35]">Telegram</a>
+                    </div>
+                </div>
+                <div>
+                    <h5 class="font-black uppercase text-[10px] text-[#FF6B35] mb-6">Локация</h5>
+                    <p class="font-bold mb-2">ул. Лесная 9А</p>
+                    <p class="text-gray-400 text-sm">9:00 — 21:00 ежедневно</p>
+                </div>
+                <div>
+                    <h5 class="font-black uppercase text-[10px] text-[#FF6B35] mb-6">Контакты</h5>
+                    <p class="font-bold mb-2">+375 (29) 000-00-00</p>
+                    <p class="text-gray-400 text-sm">post@post.by</p>
+                </div>
+            </div>
+            <div class="pt-12 border-t border-white/10 flex justify-between text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+                <span>© г Добруш.</span>
+                <div class="space-x-8">
+                    <a href="#">Предложения</a>
+                    <a href="#">Приватность</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    
+    <div x-show="historyOpen" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-6">
+        <div @click="historyOpen = false" class="absolute inset-0 bg-black/90 backdrop-blur-xl"></div>
+        <div class="relative bg-white w-full max-w-4xl p-12 rounded-sm border-l-8 border-[#FF6B35]">
+            <h2 class="text-5xl font-black mb-8 italic">Наша История</h2>
+            <div class="grid md:grid-cols-2 gap-12 text-lg text-gray-600">
+                <p>Мы начинали с гаража и мечты. Сегодня мы — это команда .</p>
+                <p>Наша обжарка — это баланс между технологией и интуицией. Мы не просто продаем кофе, мы делимся страстью.</p>
+            </div>
+            <button @click="historyOpen = false" class="mt-12 font-black border-b-2 border-black hover:text-[#FF6B35]">Закрыть</button>
+        </div>
+    </div>
+
+    
+    <div x-show="authOpen" x-cloak class="fixed inset-0 z-[110] flex items-center justify-center p-6">
+        <div @click="authOpen = false" class="absolute inset-0 bg-black/80 backdrop-blur-md"></div>
+        <div class="relative bg-white w-full max-w-md p-10 border-t-8 border-[#FF6B35]">
+            <h2 class="text-4xl font-black mb-8" x-text="authMode === 'login' ? 'Вход' : 'Регистрация'"></h2>
+            <form @submit.prevent="isLoggedIn = true; authOpen = false; if(!userName) userName = 'User'" class="space-y-6">
+                <div x-show="authMode === 'register'"><input type="text" x-model="userName" class="input-brutalist" placeholder="Имя"></div>
+                <input type="email" required class="input-brutalist" placeholder="Email">
+                <input type="password" required class="input-brutalist" placeholder="Пароль">
+                <button type="submit" class="blob-btn w-full">Начать</button>
+            </form>
+            <button @click="authMode = (authMode === 'login' ? 'register' : 'login')" class="w-full text-center mt-6 text-xs font-bold text-gray-400" x-text="authMode === 'login' ? 'Нет аккаунта?' : 'Уже есть аккаунт?'"></button>
+        </div>
+    </div>
+
+    
+    <div x-show="cartOpen" x-cloak class="fixed inset-0 z-[100] flex justify-end">
+        <div @click="cartOpen = false" class="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+        <div class="relative w-full max-w-md bg-white h-full shadow-2xl p-12 flex flex-col border-l-4 border-black">
+            <h2 class="text-4xl font-black mb-12 italic text-[#FF6B35]">Cart</h2>
+            <div class="flex-grow overflow-y-auto space-y-4">
+                <template x-for="(item, index) in cart" :key="index">
+                    <div class="flex justify-between items-center bg-gray-50 p-4">
+                        <div><p class="font-bold italic" x-text="item.name"></p><p class="text-xs text-gray-400" x-text="item.price + ' BYN'"></p></div>
+                        <div class="flex items-center space-x-4"><span class="font-black" x-text="item.count + 'x'"></span><button @click="cart.splice(index, 1)" class="text-red-500">×</button></div>
+                    </div>
+                </template>
+                <template x-if="cart.length === 0"><p class="text-center py-20 text-gray-400 font-bold italic">Пусто</p></template>
+            </div>
+            <div x-show="cart.length > 0" class="pt-8 border-t-2 border-black">
+                <div class="flex justify-between text-2xl font-black mb-8"><span>Общая сумма:</span><span x-text="total + ' BYN'"></span></div>
+                <button class="blob-btn w-full">Оформить</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
